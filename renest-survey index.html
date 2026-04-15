@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Furniture Survey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #FAF7F2;
+    --card: #FFFFFF;
+    --accent: #C67D4A;
+    --accent-light: #F5E6D8;
+    --accent-dark: #A15E2F;
+    --text: #2D2A26;
+    --text-muted: #8A8580;
+    --border: #E8E2DA;
+    --success: #5A8F6B;
+    --success-light: #E8F3EC;
+    --error: #C0513F;
+    --error-light: #FCEAE7;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 16px 60px;
+  }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .header { text-align: center; margin-bottom: 32px; max-width: 520px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--accent-light); padding: 6px 14px; border-radius: 20px; margin-bottom: 16px;
+  }
+  .badge span { font-size: 12px; font-weight: 600; color: var(--accent-dark); letter-spacing: 0.06em; text-transform: uppercase; }
+  .header h1 { font-family: 'Fraunces', serif; font-size: 30px; font-weight: 600; line-height: 1.3; margin-bottom: 8px; }
+  .header p { font-size: 15px; color: var(--text-muted); line-height: 1.5; }
+
+  .card {
+    width: 100%; max-width: 520px; background: var(--card); border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06); overflow: hidden;
+  }
+
+  .progress-bar { width: 100%; height: 4px; background: var(--border); }
+  .progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+    border-radius: 2px; transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .card-body { padding: 28px 28px 24px; }
+
+  .step-counter { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; font-weight: 500; }
+  .optional-tag {
+    margin-left: 8px; padding: 2px 8px; background: var(--border);
+    border-radius: 4px; font-size: 11px; font-weight: 600;
+  }
+
+  .question-area { animation: fadeSlideIn 0.4s ease forwards; }
+
+  .section-banner {
+    margin-bottom: 24px; padding: 16px 20px;
+    background: linear-gradient(135deg, var(--accent-light), #FFF8F2);
+    border-radius: 12px; border-left: 4px solid var(--accent);
+  }
+  .section-banner h3 { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; color: var(--accent-dark); margin-bottom: 4px; }
+  .section-banner p { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+
+  .question-text { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 500; line-height: 1.4; margin-bottom: 6px; }
+  .max-label { font-size: 13px; color: var(--text-muted); margin: 0 0 16px; font-weight: 500; }
+
+  .options { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+
+  .option-btn {
+    display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 16px;
+    border: 1.5px solid var(--border); border-radius: 10px; background: var(--card);
+    cursor: pointer; text-align: left; font-family: 'DM Sans', sans-serif;
+    font-size: 15px; color: var(--text); line-height: 1.4; transition: all 0.2s ease;
+  }
+  .option-btn:hover { filter: brightness(0.97); }
+  .option-btn.selected { border-color: var(--accent); background: var(--accent-light); }
+  .option-btn.disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .radio-dot {
+    flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid var(--border); display: flex; align-items: center;
+    justify-content: center; transition: all 0.2s ease;
+  }
+  .selected .radio-dot { border-color: var(--accent); background: var(--accent); }
+  .radio-dot-inner { width: 8px; height: 8px; border-radius: 50%; background: #fff; display: none; }
+  .selected .radio-dot-inner { display: block; }
+
+  .check-box {
+    flex-shrink: 0; width: 20px; height: 20px; border-radius: 5px;
+    border: 2px solid var(--border); display: flex; align-items: center;
+    justify-content: center; transition: all 0.2s ease;
+  }
+  .selected .check-box { border-color: var(--accent); background: var(--accent); }
+  .check-svg { display: none; }
+  .selected .check-svg { display: block; }
+
+  .other-input {
+    margin-left: 32px; margin-top: 4px; padding: 10px 14px;
+    border: 1.5px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif;
+    font-size: 15px; color: var(--text); outline: none; background: var(--card); width: calc(100% - 32px);
+  }
+  .other-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+
+  .text-input, .text-area {
+    width: 100%; padding: 14px 16px; border: 1.5px solid var(--border); border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--text);
+    outline: none; background: var(--card); margin-top: 12px;
+  }
+  .text-area { resize: vertical; line-height: 1.5; }
+  .text-input:focus, .text-area:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+
+  .error-msg {
+    margin-top: 10px; padding: 8px 12px; background: var(--error-light);
+    color: var(--error); border-radius: 8px; font-size: 13px; font-weight: 500;
+  }
+
+  .nav { display: flex; justify-content: space-between; margin-top: 28px; gap: 12px; }
+  .btn-back {
+    padding: 12px 24px; border-radius: 10px; border: 1.5px solid var(--border);
+    background: transparent; font-family: 'DM Sans', sans-serif; font-size: 15px;
+    font-weight: 500; color: var(--text-muted); cursor: pointer; transition: all 0.2s ease;
+  }
+  .btn-next {
+    padding: 12px 28px; border-radius: 10px; border: none;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+    color: #fff; cursor: pointer; transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(198,125,74,0.27);
+  }
+  .btn-back:hover, .btn-next:hover { filter: brightness(0.95); }
+
+  .thank-you { text-align: center; padding: 60px 20px; animation: fadeSlideIn 0.5s ease forwards; }
+  .thank-icon {
+    width: 72px; height: 72px; border-radius: 50%; background: var(--success-light);
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;
+  }
+  .thank-you h2 { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 600; margin-bottom: 12px; }
+  .thank-you p { font-size: 16px; color: var(--text-muted); line-height: 1.6; max-width: 400px; margin: 0 auto; }
+
+  .footer { font-size: 12px; color: var(--text-muted); margin-top: 24px; opacity: 0.6; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="badge">
+    <span style="font-size:16px">🪑</span>
+    <span>Quick Survey</span>
+  </div>
+  <h1>Help Shape the Future of Furniture</h1>
+  <p>Takes ~2 minutes. Your honest answers matter.</p>
+</div>
+
+<div class="card">
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="card-body" id="cardBody"></div>
+</div>
+
+<p class="footer">Your responses are anonymous. Thank you for your time.</p>
+
+<script>
+const QUESTIONS = [
+  { id:1, section:1, type:"single", required:true, question:"Have you furnished or refreshed a room, apartment, or rental unit in the last 2 years?", options:["Yes","No"] },
+  { id:2, section:1, type:"single", required:true, question:"What was the biggest pain point in furnishing or refreshing the space?", options:["Too expensive","Hard to find stylish pieces","Delivery / moving / setup was difficult","Assembly was annoying","Used furniture felt risky or unappealing","Hard to find everything in one place"], hasOther:true },
+  { id:3, section:1, type:"multi", required:true, question:"Where did you mostly get furniture or home items from? (Select all that apply)", options:["IKEA","Amazon / Target / Walmart / big box stores","Facebook Marketplace / Craigslist / secondhand apps","Hand-me-downs from family or friends","Local furniture stores","Thrift / vintage / resale stores"], hasOther:true },
+  { id:4, section:1, type:"single", required:true, question:"Would you consider buying furniture that is secondhand if it was cleaned, refurbished, stylish, and delivered?", options:["Yes","Maybe","No"] },
+  { id:5, section:1, type:"single", required:true, question:"Which of these would interest you the most?", options:["Affordable curated furniture bundles for move-in","Restyled / refurbished furniture that looks better than typical secondhand","A service that upgrades furniture I already own (paint, stain, hardware, upholstery)","Pickup of unwanted furniture + credit toward another piece","A furnished rental / room refresh service","None of these"] },
+  { id:6, section:1, type:"multi", required:true, maxSelect:2, question:"What matters most to you when buying or refreshing furniture? (Choose up to 2)", options:["Price","Style / aesthetic","Cleanliness / trust","Convenience / delivery","Sustainability","Speed","Durability / quality"] },
+  { id:7, section:1, type:"single", required:true, question:"For a stylish refurbished nightstand or side table in great condition, what's the most you'd realistically pay?", options:["Under $50","$50\u2013$100","$100\u2013$150","$150+"] },
+  { id:8, section:1, type:"paragraph", required:false, question:"What would make you trust a service like this enough to try it?", placeholder:"e.g. before/after photos, cleaning standards, delivery included, return option, reviews, consistent style\u2026" },
+  { id:9, section:2, type:"single", required:false, question:"Would you be open to a quick 5-minute follow-up chat?", options:["Yes","Maybe","No"], sectionTitle:"Optional Follow-Up", sectionDesc:"If you\u2019d be open to a quick 5-minute follow-up chat, I\u2019d really appreciate it. This is totally optional." },
+  { id:10, section:2, type:"short", required:false, question:"Name (optional)", placeholder:"Your name" },
+  { id:11, section:2, type:"single", required:false, question:"Preferred contact method", options:["WhatsApp","Email","Either"] },
+  { id:12, section:2, type:"short", required:false, question:"Best contact info (WhatsApp number or email)", placeholder:"Your WhatsApp number or email address" }
+];
+
+let step = 0;
+const answers = {};
+const total = QUESTIONS.length;
+
+function render() {
+  const q = QUESTIONS[step];
+  const pct = (step / total) * 100;
+  document.getElementById("progressFill").style.width = pct + "%";
+
+  let html = "";
+
+  // Step counter
+  html += `<div class="step-counter">${step+1} of ${total}`;
+  if (!q.required) html += `<span class="optional-tag">OPTIONAL</span>`;
+  html += `</div>`;
+
+  html += `<div class="question-area">`;
+
+  // Section banner
+  if (q.sectionTitle) {
+    html += `<div class="section-banner"><h3>${q.sectionTitle}</h3><p>${q.sectionDesc}</p></div>`;
+  }
+
+  // Question text
+  html += `<h2 class="question-text">${q.question}</h2>`;
+
+  // Max select label
+  if (q.maxSelect) {
+    const count = Array.isArray(answers[q.id]) ? answers[q.id].length : 0;
+    html += `<p class="max-label">${count} / ${q.maxSelect} selected</p>`;
+  }
+
+  // Options
+  if (q.type === "single") {
+    html += `<div class="options">`;
+    q.options.forEach((opt, i) => {
+      const sel = answers[q.id] === opt;
+      html += `<button class="option-btn${sel ? " selected" : ""}" onclick="selectSingle(${q.id},'${esc(opt)}')">
+        <span class="radio-dot"><span class="radio-dot-inner"></span></span>${opt}</button>`;
+    });
+    if (q.hasOther) {
+      const isOther = typeof answers[q.id] === "string" && answers[q.id].startsWith("Other:");
+      html += `<button class="option-btn${isOther ? " selected" : ""}" onclick="selectSingle(${q.id},'Other:')">
+        <span class="radio-dot"><span class="radio-dot-inner"></span></span>Other</button>`;
+      if (isOther) {
+        const val = answers[q.id].replace("Other: ","");
+        html += `<input class="other-input" type="text" placeholder="Please specify\u2026" value="${esc(val)}" oninput="updateOther(${q.id},this.value,false)" autofocus>`;
+      }
+    }
+    html += `</div>`;
+  }
+
+  if (q.type === "multi") {
+    const selected = Array.isArray(answers[q.id]) ? answers[q.id] : [];
+    const maxReached = q.maxSelect && selected.length >= q.maxSelect;
+    html += `<div class="options">`;
+    q.options.forEach(opt => {
+      const checked = selected.includes(opt);
+      const dis = maxReached && !checked;
+      html += `<button class="option-btn${checked ? " selected" : ""}${dis ? " disabled" : ""}" onclick="${dis ? "" : `toggleMulti(${q.id},'${esc(opt)}')`}">
+        <span class="check-box"><svg class="check-svg" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6L5 8.5L9.5 3.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>${opt}</button>`;
+    });
+    if (q.hasOther) {
+      const isOther = selected.some(a => a.startsWith("Other:"));
+      const dis = maxReached && !isOther;
+      html += `<button class="option-btn${isOther ? " selected" : ""}${dis ? " disabled" : ""}" onclick="${dis ? "" : `toggleMultiOther(${q.id})`}">
+        <span class="check-box"><svg class="check-svg" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6L5 8.5L9.5 3.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Other</button>`;
+      if (isOther) {
+        const val = (selected.find(a => a.startsWith("Other:")) || "Other: ").replace("Other: ","");
+        html += `<input class="other-input" type="text" placeholder="Please specify\u2026" value="${esc(val)}" oninput="updateOther(${q.id},this.value,true)" autofocus>`;
+      }
+    }
+    html += `</div>`;
+  }
+
+  if (q.type === "paragraph") {
+    html += `<textarea class="text-area" rows="4" placeholder="${esc(q.placeholder||"")}" oninput="answers[${q.id}]=this.value">${answers[q.id]||""}</textarea>`;
+  }
+
+  if (q.type === "short") {
+    html += `<input class="text-input" type="text" placeholder="${esc(q.placeholder||"")}" value="${esc(answers[q.id]||"")}" oninput="answers[${q.id}]=this.value">`;
+  }
+
+  html += `<div id="errorBox"></div>`;
+  html += `</div>`; // end question-area
+
+  // Navigation
+  html += `<div class="nav">`;
+  if (step > 0) {
+    html += `<button class="btn-back" onclick="goBack()">\u2190 Back</button>`;
+  } else {
+    html += `<div></div>`;
+  }
+  const label = step === total - 1 ? "Submit" : (!q.required ? "Skip \u2192" : "Next \u2192");
+  html += `<button class="btn-next" onclick="goNext()">${label}</button>`;
+  html += `</div>`;
+
+  document.getElementById("cardBody").innerHTML = html;
+}
+
+function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/'/g,"&#39;").replace(/</g,"&lt;"); }
+
+function selectSingle(id, val) {
+  if (val === "Other:") {
+    answers[id] = "Other: ";
+  } else {
+    answers[id] = val;
+  }
+  render();
+}
+
+function toggleMulti(id, val) {
+  if (!Array.isArray(answers[id])) answers[id] = [];
+  const idx = answers[id].indexOf(val);
+  if (idx > -1) { answers[id].splice(idx, 1); } else { answers[id].push(val); }
+  render();
+}
+
+function toggleMultiOther(id) {
+  if (!Array.isArray(answers[id])) answers[id] = [];
+  const idx = answers[id].findIndex(a => a.startsWith("Other:"));
+  if (idx > -1) { answers[id].splice(idx, 1); } else { answers[id].push("Other: "); }
+  render();
+}
+
+function updateOther(id, val, isMulti) {
+  if (isMulti) {
+    if (!Array.isArray(answers[id])) answers[id] = [];
+    const idx = answers[id].findIndex(a => a.startsWith("Other:"));
+    if (idx > -1) answers[id][idx] = "Other: " + val;
+    else answers[id].push("Other: " + val);
+  } else {
+    answers[id] = "Other: " + val;
+  }
+}
+
+function showError(msg) {
+  document.getElementById("errorBox").innerHTML = `<div class="error-msg">${msg}</div>`;
+}
+
+function validate() {
+  const q = QUESTIONS[step];
+  if (!q.required) return true;
+  const a = answers[q.id];
+  if (q.type === "single" && !a) { showError("Please select an option."); return false; }
+  if (q.type === "multi" && (!Array.isArray(a) || a.length === 0)) { showError("Please select at least one option."); return false; }
+  return true;
+}
+
+function goNext() {
+  if (!validate()) return;
+  if (step < total - 1) { step++; render(); window.scrollTo({top:0,behavior:"smooth"}); }
+  else { submit(); }
+}
+
+function goBack() {
+  if (step > 0) { step--; render(); window.scrollTo({top:0,behavior:"smooth"}); }
+}
+
+function submit() {
+  // Build payload
+  const payload = {};
+  QUESTIONS.forEach(q => { payload["Q"+q.id] = answers[q.id] ?? ""; });
+  console.log("Survey responses:", payload);
+
+  // =============================================
+  // TO COLLECT RESPONSES: uncomment one option below
+  // =============================================
+
+  // OPTION A: Google Sheets via Apps Script
+  // Replace YOUR_SCRIPT_URL with your deployed Google Apps Script URL
+  //
+  // fetch("YOUR_SCRIPT_URL", {
+  //   method: "POST",
+  //   mode: "no-cors",
+  //   headers: { "Content-Type": "application/json" },
+  //   body: JSON.stringify(payload)
+  // });
+
+  // OPTION B: Formspree (free tier: 50 submissions/month)
+  // Replace YOUR_FORM_ID with your Formspree form ID
+  //
+  // fetch("https://formspree.io/f/YOUR_FORM_ID", {
+  //   method: "POST",
+  //   headers: { "Content-Type": "application/json" },
+  //   body: JSON.stringify(payload)
+  // });
+
+  showThankYou();
+}
+
+function showThankYou() {
+  document.getElementById("progressFill").style.width = "100%";
+  document.getElementById("cardBody").innerHTML = `
+    <div class="thank-you">
+      <div class="thank-icon">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+          <path d="M10 18L16 24L26 12" stroke="var(--success)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h2>Thank you so much!</h2>
+      <p>Your response is really helpful as I validate this concept. If you selected \u201cyes\u201d or \u201cmaybe\u201d for a follow-up chat, I may reach out soon.</p>
+    </div>`;
+}
+
+// Init
+render();
+</script>
+</body>
+</html>
